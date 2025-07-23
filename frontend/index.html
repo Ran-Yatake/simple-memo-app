@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>メモ帳アプリ</title>
+</head>
+<body>
+  <h1>メモを追加</h1>
+  <input id="title" type="text" placeholder="タイトル" /><br /><br />
+  <textarea id="content" placeholder="内容"></textarea><br /><br />
+  <button onclick="addMemo()">保存</button>
+
+  <h2>保存されたメモ</h2>
+  <ul id="memo-list"></ul>
+
+  <script>
+    async function addMemo() {
+      const title = document.getElementById("title").value;
+      const content = document.getElementById("content").value;
+
+      await fetch("http://localhost:5000/memo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content })
+      });
+
+      document.getElementById("title").value = "";
+      document.getElementById("content").value = "";
+
+      loadMemos(); // 追加後に再表示
+    }
+
+    async function loadMemos() {
+      const res = await fetch("http://localhost:5000/memo");
+      const memos = await res.json();
+      const list = document.getElementById("memo-list");
+      list.innerHTML = "";
+      memos.forEach((memo) => {
+        const li = document.createElement("li");
+        li.textContent = `📌 ${memo.title}: ${memo.content}`;
+        list.appendChild(li);
+      });
+    }
+
+    // 初回表示時にメモを読み込む
+    window.onload = loadMemos;
+  </script>
+</body>
+</html>
